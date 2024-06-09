@@ -4,15 +4,14 @@ import (
 	"net/http"
 	"resfull_api/app"
 	"resfull_api/controller"
-	"resfull_api/exception"
 	"resfull_api/helper"
+	"resfull_api/middleware"
 	"resfull_api/repository"
 	"resfull_api/service"
 
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -22,20 +21,11 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepository, db, validate)
 	categoryController := controller.NewCategoryController(categoryService)
 
-
-	router := httprouter.New()
-
-	router.GET("/api/categories", categoryController.FindAll)
-	router.GET("/api/category/:categoryId", categoryController.FindById)
-	router.POST("/api/category", categoryController.Create)
-	router.PUT("/api/category/:categoryId", categoryController.Update)
-	router.DELETE("/api/category/:categoryId", categoryController.Delete)
-
-	router.PanicHandler = exception.ErrorHandler
+	router := app.NewRouter(categoryController)
 	
 	server := http.Server{
 		Addr: "localhost:3000",
-		Handler: router,
+		Handler: middleware.NewAuthMiddleware(router),
 	}
 
 	err := server.ListenAndServe()

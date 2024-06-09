@@ -6,8 +6,8 @@ build/
 tmp/
 
 # Test
-*.out
-*.test
+# *.out
+# *.test
 
 # Environment variables
 .env
